@@ -44,23 +44,22 @@ jQuery(document).ready(function() {
 <table class="openmrsSearchTable">
 	<tr>
 		<th></th>
-		<th><openmrs:message code="general.locale"/><a href="?sort=conceptLocale&order=desc"><img style="width: 14px; height: 14px;" border="0" src="<%=request.getContextPath()%>/images/movedown.gif"></a><a href="?sort=conceptClass&order=asc"><img style="width: 14px; height: 14px;" border="0" src="<%=request.getContextPath()%>/images/moveup.gif"></a></th>
-		<th><spring:message code="conceptsearch.nameLabel" /><a href="?sort=conceptName&order=desc"><img style="width: 14px; height: 14px;" border="0" src="<%=request.getContextPath()%>/images/movedown.gif"></a><a href="?sort=conceptName&order=asc"><img style="width: 14px; height: 14px;" border="0" src="<%=request.getContextPath()%>/images/moveup.gif"></a></th>
-		<th><spring:message code="conceptsearch.tags" /><a href="?sort=conceptTag&order=desc"><img style="width: 14px; height: 14px;" border="0" src="<%=request.getContextPath()%>/images/movedown.gif"></a><a href="?sort=conceptDatatype&order=asc"><img style="width: 14px; height: 14px;" border="0" src="<%=request.getContextPath()%>/images/moveup.gif"></a></th>
+		<th><spring:message code="Concept" /><a href="?sort=conceptName&order=desc"><img style="width: 14px; height: 14px;" border="0" src="<%=request.getContextPath()%>/images/movedown.gif"></a><a href="?sort=conceptName&order=asc"><img style="width: 14px; height: 14px;" border="0" src="<%=request.getContextPath()%>/images/moveup.gif"></a></th>
+		<th><spring:message code="Concept.conceptClass" /><a href="?sort=conceptClass&order=desc"><img style="width: 14px; height: 14px;" border="0" src="<%=request.getContextPath()%>/images/movedown.gif"></a><a href="?sort=conceptClass&order=asc"><img style="width: 14px; height: 14px;" border="0" src="<%=request.getContextPath()%>/images/moveup.gif"></a></th>
+		<th><spring:message code="Concept.datatype" /><a href="?sort=conceptDatatype&order=desc"><img style="width: 14px; height: 14px;" border="0" src="<%=request.getContextPath()%>/images/movedown.gif"></a><a href="?sort=conceptDatatype&order=asc"><img style="width: 14px; height: 14px;" border="0" src="<%=request.getContextPath()%>/images/moveup.gif"></a></th>
 		<!-- <th>Other Names</th> -->
+		<th><spring:message code="conceptsearch.numberofobs" /><a href="?sort=numberOfObs&order=desc"><img style="width: 13px; height: 13px;" border="0" src="<%=request.getContextPath()%>/images/movedown.gif"></a><a href="?sort=numberOfObs&order=asc"><img style="width: 14px; height: 14px;" border="0" src="<%=request.getContextPath()%>/images/moveup.gif"></a></th>
 	</tr>
 
 	<c:forEach var="concept" items="${searchResult.pageList}" varStatus="rowStatus">
 		<tr class='${rowStatus.index % 2 == 0 ? "evenRow" : "oddRow"}'>
 			<td class="searchIndex">${rowStatus.index + (searchResult.page * searchResult.pageSize + 1)}.</td>
-			<td>${concept.locale}</td>
 			<td><a class="searchHit"
-				href="viewConcept.form?conceptId=${concept.conceptId}" title="${concept.conceptDescription}">${concept.conceptName}</a></td>
-			<td><c:forEach var="tag" items="${concept.conceptNameTags}" varStatus="rowStatus">
-				</br>${tag}
-			</c:forEach>
-			</td>
+				href="conceptNameEditor.form?conceptId=${concept.conceptId}" title="${concept.conceptDescription}">${concept.conceptName}</a></td>
+			<td>${concept.conceptClass}</td>
+			<td>${concept.conceptDatatype}</td>
 			<!--  <td>${concept.otherNames}</td> -->
+			<td>${concept.numberOfObs}</td>
 		</tr>
 	</c:forEach>
 </table>

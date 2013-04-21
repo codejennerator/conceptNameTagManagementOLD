@@ -52,7 +52,7 @@
 		<property name="successView"><value>conceptNameTag.list</value></property>
 	</bean>
 
-	<!--  Form Controller for the add/edit concept types page -->
+	<!--  Form Controller for the add/edit concept tags page -->
 	<bean id="conceptNameTagForm"
 		class="org.openmrs.module.conceptsearch.web.controller.ConceptNameTagFormController">
 		<property name="sessionForm"><value>true</value></property>
@@ -60,5 +60,6 @@
 		<property name="formView"><value>/module/conceptsearch/conceptNameTagForm</value></property>
 		<property name="successView"><value>conceptNameTag.list</value></property>
 	</bean>
+
 </beans>
 

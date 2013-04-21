@@ -40,7 +40,7 @@ public class ConceptSearchResult implements Comparable<ConceptSearchResult>{
 	
 	private String conceptClass;
 	
-	private String locale;
+	private List<String> locales;
 	
 	private String conceptDatatype;
 	
@@ -63,7 +63,8 @@ public class ConceptSearchResult implements Comparable<ConceptSearchResult>{
 		for(ConceptNameTag ctn : name.getTags()){
 			this.conceptNameTags.add(ctn.getTag());
 		}
-		this.locale = name.getLocale().getDisplayName();
+		this.otherNames.add(name.getName());
+		this.locales.add(name.getLocale().getDisplayLanguage());
 			
 	}
 	
@@ -82,19 +83,17 @@ public class ConceptSearchResult implements Comparable<ConceptSearchResult>{
 			this.conceptDatatype = con.getDatatype().getName();
 		}
 		this.otherNames = new Vector<String>();
+		this.conceptNameTags = new Vector<String>();
+		this.locales = new Vector<String>();
 		for (ConceptName cn : con.getNames()) {
 			this.otherNames.add(cn.getName());
-		}
-		if (con.getName() != null) {
-			this.conceptNameTags = new Vector<String>();
-			for(ConceptNameTag ctn : con.getName().getTags()){
+			this.locales.add(cn.getLocale().getDisplayLanguage());
+			for(ConceptNameTag ctn : cn.getTags()){
 				this.conceptNameTags.add(ctn.getTag());
 			}
 		}
-		
-		if (con.getName() != null) {
-			this.locale = con.getName().getLocale().getDisplayName();
-		}
+			
+
 		
 		
 		
@@ -213,17 +212,17 @@ public class ConceptSearchResult implements Comparable<ConceptSearchResult>{
 	}
 	
 	/**
-	 * @return the locale
+	 * @return the locales
 	 */
-	public String getLocale() {
-		return locale;
+	public List<String> getLocales() {
+		return locales;
 	}
 	
 	/**
-	 * @param locale the locale to set
+	 * @param locales the locales to set
 	 */
-	public void setLocale(String locale) {
-		this.locale = locale;
+	public void setLocales(List<String> locales) {
+		this.locales = locales;
 	}
 
 	/* (non-Javadoc)

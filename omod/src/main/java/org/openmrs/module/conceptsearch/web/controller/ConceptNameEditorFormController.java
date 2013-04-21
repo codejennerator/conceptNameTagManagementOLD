@@ -34,10 +34,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.WebRequest;
 
 /**
- * Controller to handle all searches performed by basicsearch.jsp.
+ * Controller to handle edit of concept names (only tags for now).
  */
 @Controller
-public class ManageConceptNameFormController extends AbstractSearchFormController {
+public class ConceptNameEditorFormController extends AbstractSearchFormController {
 
 	@ModelAttribute("conceptQuery")
 	public String getConceptQuery(@RequestParam(value="conceptQuery", required=false) String conceptQuery) {
@@ -50,7 +50,7 @@ public class ManageConceptNameFormController extends AbstractSearchFormControlle
 		dataBinder.setRequiredFields(new String[] { "conceptQuery" });
 	}
 	
-	@RequestMapping(value = "/module/conceptsearch/manageConceptName", method = RequestMethod.GET)
+	@RequestMapping(value = "/module/conceptsearch/conceptNameEditor", method = RequestMethod.GET)
 	public void showBasicSearch(ModelMap model, WebRequest request, HttpSession session) {
 		//display basicSearch.jsp	
 		session.removeAttribute("searchResult");
@@ -58,7 +58,7 @@ public class ManageConceptNameFormController extends AbstractSearchFormControlle
 		session.removeAttribute("conceptSearch");
 	}
 	
-	@RequestMapping(value = "/module/conceptsearch/manageConceptName", method = RequestMethod.POST)
+	@RequestMapping(value = "/module/conceptsearch/conceptNameEditor", method = RequestMethod.POST)
 	public void performBasicSearch(@ModelAttribute("conceptQuery") String searchQuery, BindingResult errors, ModelMap model, WebRequest request, HttpSession session) {
 		ConceptSearchService searchService = (ConceptSearchService) Context.getService(ConceptSearchService.class);
 		List<Concept> rslt = new ArrayList<Concept>();
@@ -90,22 +90,47 @@ public class ManageConceptNameFormController extends AbstractSearchFormControlle
 		}
 	}
 	
-	@RequestMapping(value = "/module/conceptsearch/manageConceptName", method = RequestMethod.GET, params = "count")
+	@RequestMapping(value = "/module/conceptsearch/conceptNameEditor", method = RequestMethod.GET, params = "count")
 	public void setConceptsPerPage(ModelMap model, WebRequest request, HttpSession session) {
 		super.setConceptsPerPage(model, request, session);
 	}
 	
-	@RequestMapping(value = "/module/conceptsearch/manageConceptName", method = RequestMethod.GET, params = "page")
+	@RequestMapping(value = "/module/conceptsearch/conceptNameEditor", method = RequestMethod.GET, params = "page")
 	public void switchToPage(@RequestParam("page") String page, ModelMap model, WebRequest request, HttpSession session) {
 		super.switchToPage(page, model, request, session);
 	}
 	
-	@RequestMapping(value = "/module/conceptsearch/manageConceptName", method = RequestMethod.GET, params = "sort")
+	@RequestMapping(value = "/module/conceptsearch/conceptNameEditor", method = RequestMethod.GET, params = "sort")
     public void sortResultsView(ModelMap model, WebRequest request, HttpSession session) {
 		super.sortResultsView(model, request, session);
 	}
-	/*
-	@RequestMapping(value = "/module/conceptsearch/manageConceptName", method = RequestMethod.GET, params = "conceptId")
+	@RequestMapping(value = "/module/conceptsearch/conceptNameEditor", method = RequestMethod.GET, params = "conceptId")
+	public void displayConceptPage(ModelMap model, WebRequest request, HttpSession session) {
+		ConceptSearchService searchService = (ConceptSearchService) Context.getService(ConceptSearchService.class);
+		
+		String id = request.getParameter("conceptId");
+		int cid = Integer.parseInt(id);
+		
+		Concept concept = searchService.getConcept(cid);
+		List<ConceptSearchResult> resList = new ArrayList<ConceptSearchResult>();	
+
+		if (concept != null) {
+			ConceptSearchResult res = new ConceptSearchResult(concept);
+			res.setNumberOfObs(searchService.getNumberOfObsForConcept(concept.getConceptId()));
+			resList.add(res);
+				
+		}
+		// add results to ListHolder
+		PagedListHolder resListHolder = new PagedListHolder(resList);
+		resListHolder.setPageSize(DEFAULT_RESULT_PAGE_SIZE);
+		
+		model.addAttribute("searchResult", resListHolder);
+		session.setAttribute("sortResults", resListHolder);
+		model.addAttribute("concept", concept);
+	}
+	
+	/* jenn comment out
+	@RequestMapping(value = "/module/conceptsearch/conceptNameEditor", method = RequestMethod.GET, params = "conceptId")
 	public void displayConceptManagementPage(ModelMap model, WebRequest request, HttpSession session) {
 		ConceptSearchService searchService = (ConceptSearchService) Context.getService(ConceptSearchService.class);
 	
@@ -114,8 +139,22 @@ public class ManageConceptNameFormController extends AbstractSearchFormControlle
 	
 		Concept concept = searchService.getConcept(cid);
 	
-		model.addAttribute("concept", concept);
+		if (concept != null) {
+		
+					ConceptSearchResult res = new ConceptSearchResult(concept);
+					res.setNumberOfObs(searchService.getNumberOfObsForConcept(c.getConceptId()));
+					resList.add(res);
+				
+		}
+			
+			// add results to ListHolder
+			PagedListHolder resListHolder = new PagedListHolder(resList);
+			resListHolder.setPageSize(DEFAULT_RESULT_PAGE_SIZE);
+			
+			model.addAttribute("searchResult", resListHolder);
+			
+			session.setAttribute("sortResults", resListHolder);
+		}
 	}
 	*/
-	
 }
