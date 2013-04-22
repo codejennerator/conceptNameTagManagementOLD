@@ -133,6 +133,16 @@ public class ConceptSearchServiceImpl implements ConceptSearchService {
     }
     
 	/**
+     * @see org.openmrs.module.conceptsearch.ConceptSearchService#getAutocompleteConceptNameTags(java.lang.String)
+     */
+    @Override
+    public List<String> getAutocompleteConceptNameTags(String searchWord) {
+    	return dao.getAutocompleteConceptNameTags(searchWord);
+    }
+    
+    
+    
+	/**
 	 * @see org.openmrs.module.conceptsearch.ConceptSearchService#purgeConceptNameTag(org.openmrs.ConceptNameTag)
 	 * TODO: check if tag is in use?
 	 */

@@ -125,6 +125,16 @@ public interface ConceptSearchService {
 	@Transactional(readOnly = true)
 	@Authorized( { OpenmrsConstants.PRIV_VIEW_CONCEPTS })
 	public List<String> getAutocompleteConcepts(String searchWord);
+	
+	/**
+	 * Returns a List of search suggestions depending on the search word entered
+	 * @param searchWord the beginning of the concept name tag
+	 * @return List of concept name tags that match the searchWord
+	 */
+	@Transactional(readOnly = true)
+	@Authorized( { OpenmrsConstants.PRIV_VIEW_CONCEPTS })
+	public List<String> getAutocompleteConceptNameTags(String searchWord);
+	
 	/**
 	 * Purges the specified concept name tag from the database
 	 * 

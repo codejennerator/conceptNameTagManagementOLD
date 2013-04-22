@@ -245,6 +245,34 @@ public class HibernateConceptSearchDAO implements ConceptSearchDAO {
 	}
 	
 	/**
+	 * Returns a list of concept name, maximum 30 elements
+	 * 
+	 * @see org.openmrs.module.conceptsearch.ConceptSearchDAO#getAutocompleteConcepts(java.lang.String)
+	 */
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<String> getAutocompleteConceptNameTags(String searchWord) throws DAOException {
+		Criteria crit = sessionFactory.getCurrentSession().createCriteria(ConceptNameTag.class);
+		Vector<String> prev = new Vector<String>();
+		//crit.createAlias("names", "names");
+		//crit.add(Restrictions.like("names.name", "%" + searchWord + "%"));
+		
+		//crit.add(Restrictions.ilike("names.name", searchWord, MatchMode.ANYWHERE));
+		//crit.add(Restrictions.eq("retired", false));
+		//crit.setMaxResults(30);
+		
+		for (ConceptNameTag cnt : (List<ConceptNameTag>) crit.list()) {
+			if (isSearchTermBeginningOfWord(cnt.getTag(), searchWord) && !prev.contains(cnt.getTag())) {
+				prev.add(cnt.getTag());
+			}
+		}
+		
+		
+		return prev;
+	}
+	
+	
+	/**
 	 * Method to find out that searchTerm is the beginning of a new word and not in the middle of a
 	 * word
 	 * 

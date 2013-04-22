@@ -14,16 +14,28 @@
 package org.openmrs.module.conceptsearch.web.controller;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Vector;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.openmrs.Concept;
+import org.openmrs.ConceptName;
+import org.openmrs.ConceptNameTag;
+import org.openmrs.api.ConceptService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.conceptsearch.ConceptSearch;
 import org.openmrs.module.conceptsearch.ConceptSearchResult;
 import org.openmrs.module.conceptsearch.ConceptSearchService;
+import org.openmrs.web.WebConstants;
+import org.openmrs.web.controller.ConceptFormController.ConceptFormBackingObject;
 import org.springframework.beans.support.PagedListHolder;
+import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.InitBinder;
@@ -32,6 +44,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.RedirectView;
 
 /**
  * Controller to handle edit of concept names (only tags for now).
@@ -59,35 +73,61 @@ public class ConceptNameEditorFormController extends AbstractSearchFormControlle
 	}
 	
 	@RequestMapping(value = "/module/conceptsearch/conceptNameEditor", method = RequestMethod.POST)
-	public void performBasicSearch(@ModelAttribute("conceptQuery") String searchQuery, BindingResult errors, ModelMap model, WebRequest request, HttpSession session) {
-		ConceptSearchService searchService = (ConceptSearchService) Context.getService(ConceptSearchService.class);
-		List<Concept> rslt = new ArrayList<Concept>();
-		ConceptSearch cs = new ConceptSearch("");
+	protected void performSaveorDelete(ModelMap model, WebRequest request, HttpSession session) {
 		
-		if (searchQuery != null && searchQuery.length()>0) {
-			cs.setSearchQuery(searchQuery);
-			rslt = searchService.getConcepts(cs);
+		ConceptService cs = Context.getConceptService();
+		ConceptSearchService searchService = (ConceptSearchService) Context.getService(ConceptSearchService.class);
+		
+		String id = request.getParameter("conceptId");
+		int cid = Integer.parseInt(id);
+		Concept concept = searchService.getConcept(cid);
+
 			
-			//add the results to a DTO to avoid Hibernate's lazy loading
-			List<ConceptSearchResult> resList = new ArrayList<ConceptSearchResult>();
-			for (Concept c : rslt) {
-				if (cs.getConceptUsedAs() == null || searchService.isConceptUsedAs(c, cs)) {
-					ConceptSearchResult res = new ConceptSearchResult(c);
-					res.setNumberOfObs(searchService.getNumberOfObsForConcept(c.getConceptId()));
-					resList.add(res);
+			if (request.getParameter("saveTagWithConceptName") != null) {
+				
+				for(ConceptName cn : concept.getNames()){
+					if(request.getParameter(cn.getName())!=null){
+						String tagName = request.getParameter("conceptQuery");
+						ConceptNameTag jennTag = cs.getConceptNameTagByName(tagName);
+						cn.addTag(jennTag);
+						cs.saveConcept(concept);
+					}
 				}
+				
+			}
+			if (request.getParameter("deleteTagWithConceptName") != null) {
+				for(ConceptName cn : concept.getNames()){
+					int i = 0; boolean del = false;
+					List<String> tags = new Vector<String>();
+					for(ConceptNameTag cnt : cn.getTags()){
+						if(request.getParameter("del"+cn.getName()+i)!=null){
+							del = true;
+							
+							String tagName = request.getParameter("del"+cn.getName()+i);
+							System.out.println("tagname----------------------------------------------->"+tagName);
+							//ConceptNameTag jennTag = cs.getConceptNameTagByName(tagName);
+							tags.add(tagName);
+							
+						}
+						i++;
+						
+					}
+					if(del){
+						for(String cntName : tags){
+							ConceptNameTag jennTag = cs.getConceptNameTagByName(cntName);
+							cn.removeTag(jennTag);
+							System.out.println("del----------------------------------------------- true");
+							
+						}
+						cs.saveConcept(concept);
+					}
+				}
+				
 			}
 			
-			// add results to ListHolder
-			PagedListHolder resListHolder = new PagedListHolder(resList);
-			resListHolder.setPageSize(DEFAULT_RESULT_PAGE_SIZE);
 			
-			model.addAttribute("searchResult", resListHolder);
-			model.addAttribute("conceptSearch", cs);
-			
-			session.setAttribute("sortResults", resListHolder);
-			session.setAttribute("conceptSearch", cs);
-		}
+			model.addAttribute("concept", concept);
+			session.setAttribute("concept", concept);
 	}
 	
 	@RequestMapping(value = "/module/conceptsearch/conceptNameEditor", method = RequestMethod.GET, params = "count")
@@ -105,9 +145,9 @@ public class ConceptNameEditorFormController extends AbstractSearchFormControlle
 		super.sortResultsView(model, request, session);
 	}
 	@RequestMapping(value = "/module/conceptsearch/conceptNameEditor", method = RequestMethod.GET, params = "conceptId")
-	public void displayConceptPage(ModelMap model, WebRequest request, HttpSession session) {
+	public void displayConceptEditPage(ModelMap model, WebRequest request, HttpSession session) {
 		ConceptSearchService searchService = (ConceptSearchService) Context.getService(ConceptSearchService.class);
-		
+		System.out.println("***********************************jenn inside concept name editor*************************");
 		String id = request.getParameter("conceptId");
 		int cid = Integer.parseInt(id);
 		
@@ -129,32 +169,15 @@ public class ConceptNameEditorFormController extends AbstractSearchFormControlle
 		model.addAttribute("concept", concept);
 	}
 	
-	/* jenn comment out
-	@RequestMapping(value = "/module/conceptsearch/conceptNameEditor", method = RequestMethod.GET, params = "conceptId")
-	public void displayConceptManagementPage(ModelMap model, WebRequest request, HttpSession session) {
-		ConceptSearchService searchService = (ConceptSearchService) Context.getService(ConceptSearchService.class);
-	
-		String id = request.getParameter("conceptId");
-		int cid = Integer.parseInt(id);
-	
-		Concept concept = searchService.getConcept(cid);
-	
-		if (concept != null) {
+	@RequestMapping(value = "/module/conceptsearch/autocompletenametag", method = RequestMethod.GET)
+	public void doAutocomplete(ModelMap model, WebRequest request, HttpSession session) {
+		//ConceptSearchService searchService = (ConceptSearchService) Context.getService(ConceptSearchService.class);
+		//String searchFor = request.getParameter("q");
+		//List<String> autoResults = searchService.getAutocompleteConcepts(searchFor);
+		//model.addAttribute("autoComplete", autoResults);
 		
-					ConceptSearchResult res = new ConceptSearchResult(concept);
-					res.setNumberOfObs(searchService.getNumberOfObsForConcept(c.getConceptId()));
-					resList.add(res);
-				
-		}
-			
-			// add results to ListHolder
-			PagedListHolder resListHolder = new PagedListHolder(resList);
-			resListHolder.setPageSize(DEFAULT_RESULT_PAGE_SIZE);
-			
-			model.addAttribute("searchResult", resListHolder);
-			
-			session.setAttribute("sortResults", resListHolder);
-		}
+		// -- Autocompletehelper is used to avoid some problems -- 
+		log.debug("Accessing autocomplete");
 	}
-	*/
+
 }

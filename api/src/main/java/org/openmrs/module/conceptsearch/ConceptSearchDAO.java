@@ -77,6 +77,11 @@ public interface ConceptSearchDAO {
      */
     public List<String> getAutocompleteConcepts(String searchWord) throws DAOException;
     
+	/**
+     * @see org.openmrs.module.conceptsearch.ConceptSearchService#getAutocompleteConceptNameTags(java.lang.String)
+     */
+    public List<String> getAutocompleteConceptNameTags(String searchWord) throws DAOException;
+    
     
 	/**
 	 * @see org.openmrs.module.conceptsearch.ConceptSearchService#purgeConceptNameTag(org.openmrs.ConceptNameTag)
